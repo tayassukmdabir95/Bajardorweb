@@ -2,7 +2,7 @@
 
 **A web application for exploring daily essential commodity prices in Bangladesh.**
 
-## Project Overview
+## Project Overview and Short Description
 
 বাজার দর (BazarDor) is a responsive web application that helps users explore the prices of essential commodities across different categories. Users can view current prices, compare price changes, sort products by price, and access detailed product information, including market-wise price ranges.
 
