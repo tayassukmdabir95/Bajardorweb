@@ -3,6 +3,33 @@
 @plugin "daisyui";
 
 
+
+@keyframes bazar-ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.bazar-ticker-track {
+  animation: bazar-ticker-scroll 45s linear infinite;
+}
+
+.bazar-ticker-track:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bazar-ticker-track {
+    animation: none;
+  }
+}
+
+
+
 /* BazarDor price ticker */
 
 .ticker-shell {

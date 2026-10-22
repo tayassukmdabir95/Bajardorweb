@@ -1,336 +1,285 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
+import { authClient } from "@/lib/auth-client";
 import {
   getProducts,
-  getProductEmoji,
   formatPrice,
+  getProductEmoji,
 } from "@/lib/bazardor";
 
-const API_BASE =
-  "https://openapi.programming-hero.com/api/bazardor";
-
-const FALLBACK_CATEGORIES = [
-  { id: "chal", slug: "chal", nameBn: "চাল", icon: "🍚" },
-  { id: "dal", slug: "dal", nameBn: "ডাল", icon: "🫘" },
-  { id: "tel", slug: "tel", nameBn: "তেল", icon: "🛢️" },
-  { id: "sobji", slug: "sobji", nameBn: "সবজি", icon: "🥬" },
-  { id: "mach", slug: "mach", nameBn: "মাছ", icon: "🐟" },
-  { id: "mangsho", slug: "mangsho", nameBn: "মাংস", icon: "🍗" },
-  { id: "dim-dui", slug: "dim-dui", nameBn: "ডিম-দুধ", icon: "🥛" },
-  { id: "mosla", slug: "mosla", nameBn: "মসলা", icon: "🌶️" },
+const fallbackCategories = [
+  { slug: "chal", name: "চাল", icon: "🍚" },
+  { slug: "dal", name: "ডাল", icon: "🫘" },
+  { slug: "tel", name: "তেল", icon: "🫙" },
+  { slug: "sobji", name: "সবজি", icon: "🥬" },
+  { slug: "mach", name: "মাছ", icon: "🐟" },
+  { slug: "mangsho", name: "মাংস", icon: "🍗" },
 ];
 
 function getBanglaDate() {
-  return new Intl.DateTimeFormat("bn-BD-u-ca-bengali", {
+  return new Intl.DateTimeFormat("bn-BD", {
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
+    timeZone: "Asia/Dhaka",
   }).format(new Date());
-}
-
-function getArray(payload) {
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.data)) return payload.data;
-  if (Array.isArray(payload?.categories)) return payload.categories;
-  return [];
 }
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
 
-  const [categories, setCategories] = useState(
-    FALLBACK_CATEGORIES
-  );
+  const { data: session, isPending } = authClient.useSession();
+
+  const [categories, setCategories] = useState(fallbackCategories);
   const [products, setProducts] = useState([]);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [banglaDate, setBanglaDate] = useState("");
+
+  const banglaDate = useMemo(() => getBanglaDate(), []);
 
   useEffect(() => {
-    setBanglaDate(getBanglaDate());
-
     let cancelled = false;
 
-    async function loadNavbarData() {
+    async function loadProducts() {
       try {
-        // Categories come from their endpoint.
-        // Products use the shared normalizer from bazardor.js.
-        const [categoryResponse, productData] = await Promise.all([
-          fetch(`${API_BASE}/categories`),
-          getProducts(),
-        ]);
+        const data = await getProducts();
 
-        if (!categoryResponse.ok) {
-          throw new Error("ক্যাটাগরির তথ্য লোড করা যায়নি।");
-        }
-
-        const categoryPayload = await categoryResponse.json();
-        const categoryData = getArray(categoryPayload);
-
-        if (cancelled) return;
-
-        if (categoryData.length > 0) {
-          setCategories(categoryData);
-        }
-
-        setProducts(productData);
-      } catch (error) {
         if (!cancelled) {
-          console.error("Navbar API error:", error);
+          setProducts(data);
         }
+      } catch (error) {
+        console.error("Ticker products could not load:", error);
       }
     }
 
-    loadNavbarData();
+    async function loadCategories() {
+      try {
+        const response = await fetch(
+          "https://openapi.programming-hero.com/api/bazardor/categories"
+        );
+
+        if (!response.ok) return;
+
+        const result = await response.json();
+
+        const data = Array.isArray(result)
+          ? result
+          : Array.isArray(result?.data)
+            ? result.data
+            : Array.isArray(result?.categories)
+              ? result.categories
+              : [];
+
+        const normalized = data
+          .map((category) => ({
+            slug: String(category.slug ?? category.id ?? ""),
+            name: String(
+              category.nameBn ??
+              category.name ??
+              category.title ??
+              ""
+            ),
+            icon: String(category.icon ?? category.emoji ?? "🛒"),
+          }))
+          .filter((category) => category.slug && category.name);
+
+        if (!cancelled && normalized.length) {
+          setCategories(normalized);
+        }
+      } catch (error) {
+        console.error("Categories could not load:", error);
+      }
+    }
+
+    loadProducts();
+    loadCategories();
 
     return () => {
       cancelled = true;
     };
   }, []);
 
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
+  const tickerProducts = useMemo(() => {
+    return products.length ? products : [];
+  }, [products]);
 
-  const isCategoryActive = (slug) =>
-    pathname === `/category/${slug}`;
+  async function handleSignOut() {
+    try {
+      const result = await authClient.signOut();
 
-  function renderTickerItem(product, index, copy) {
-    const change = Number(product.changePercent ?? 0);
-    const productId = product.id || product.slug;
+      if (result.error) {
+        toast.error(result.error.message || "সাইন আউট করা যায়নি।");
+        return;
+      }
 
-    const changeColor =
-      change > 0
-        ? "font-bold text-lime-300"
-        : change < 0
-          ? "font-bold text-rose-300"
-          : "font-bold text-gray-300";
-
-    const arrow =
-      change > 0 ? "▲" : change < 0 ? "▼" : "—";
-
-    const unit = String(product.unit || "একক উল্লেখ নেই")
-      .replace(/^প্রতি\s*/, "");
-
-    return (
-      <Link
-        key={`${copy}-${productId || index}`}
-        href={
-          productId
-            ? `/product/${encodeURIComponent(product.slug || product.id)}`
-            : "/"
-        }
-        className="ticker-item"
-        aria-label={`${product.name} এর দাম`}
-      >
-        <span className="text-xl">
-          {getProductEmoji(product)}
-        </span>
-
-        <span className="font-semibold">
-          {product.name}
-        </span>
-
-        <span className="whitespace-nowrap text-white/80">
-          {formatPrice(product.price)} টাকা/{unit}
-        </span>
-
-        <span className={changeColor}>
-          {arrow} {formatPrice(Math.abs(change))}%
-        </span>
-      </Link>
-    );
+      toast.success("সফলভাবে সাইন আউট হয়েছে।");
+      router.push("/");
+      router.refresh();
+    } catch {
+      toast.error("সাইন আউট করার সময় সমস্যা হয়েছে।");
+    }
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-base-100 shadow-sm">
-      {/* Logo, date, and authentication links */}
-      <div className="border-b border-base-200">
-        <div className="navbar mx-auto min-h-20 max-w-6xl px-4">
-          <div className="flex-1">
-            <Link
-              href="/"
-              className="flex items-center gap-3"
-              aria-label="বাজার দর হোম পেজ"
-            >
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-success/15 text-3xl">
-                🛒
-              </span>
-
-              <span>
-                <span className="block text-xl font-extrabold tracking-tight text-success sm:text-2xl">
-                  বাজার দর
-                </span>
-
-                <span className="block text-xs text-base-content/60">
-                  {banglaDate || "বাংলা তারিখ"}
-                </span>
-              </span>
-            </Link>
-          </div>
-
-          <div className="hidden items-center gap-2 sm:flex">
-            <Link
-              href="/signin"
-              className="btn btn-ghost btn-sm sm:btn-md"
-            >
-              সাইন ইন
-            </Link>
-
-            <Link
-              href="/signup"
-              className="btn btn-success btn-sm text-white sm:btn-md"
-            >
-              সাইন আপ
-            </Link>
-          </div>
-
-          <button
-            type="button"
-            className="btn btn-ghost btn-square sm:hidden"
-            aria-label={
-              mobileMenuOpen
-                ? "মেনু বন্ধ করুন"
-                : "মেনু খুলুন"
-            }
-            aria-expanded={mobileMenuOpen}
-            onClick={() =>
-              setMobileMenuOpen((previous) => !previous)
-            }
-          >
-            {mobileMenuOpen ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18 18 6M6 6l12 12"
-                />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Category navigation */}
-      <nav
-        aria-label="পণ্যের ক্যাটাগরি"
-        className={`border-b border-base-200 ${
-          mobileMenuOpen ? "block" : "hidden"
-        } sm:block`}
-      >
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-center sm:gap-2">
+    <header className="sticky top-0 z-50 border-b border-base-300 bg-base-100">
+      <div className="mx-auto max-w-7xl px-3 sm:px-5 lg:px-8">
+        <div className="flex min-h-20 items-center justify-between gap-3 py-3">
           <Link
             href="/"
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+            className="flex min-w-0 items-center gap-2 sm:gap-3"
+            aria-label="বাজার দর হোম পেজ"
+          >
+            <Image
+              src="/logo.png"
+              alt="বাজার দর লোগো"
+              width={48}
+              height={48}
+              className="h-10 w-10 shrink-0 rounded-xl object-contain sm:h-12 sm:w-12"
+              priority
+            />
+
+            <div className="min-w-0">
+              <span className="block text-lg font-extrabold leading-tight sm:text-2xl">
+                বাজার দর
+              </span>
+              <span className="mt-1 block text-[10px] text-base-content/60 sm:text-xs">
+                {banglaDate}
+              </span>
+            </div>
+          </Link>
+
+          <div className="flex shrink-0 items-center gap-2">
+            {isPending ? (
+              <span className="loading loading-spinner loading-sm text-success" />
+            ) : session ? (
+              <>
+                <Link
+                  href="/profile"
+                  className="btn btn-ghost btn-sm"
+                >
+                  <span aria-hidden="true">👤</span>
+                  <span className="hidden sm:inline">
+                    {session.user?.name || "প্রোফাইল"}
+                  </span>
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="btn btn-outline btn-error btn-sm"
+                >
+                  সাইন আউট
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/signin"
+                  className="btn btn-ghost btn-sm"
+                >
+                  সাইন ইন
+                </Link>
+
+                <Link
+                  href="/signup"
+                  className="btn btn-success btn-sm"
+                >
+                  সাইন আপ
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+
+        <nav
+          aria-label="পণ্যের বিভাগ"
+          className="flex gap-2 overflow-x-auto border-t border-base-200 py-2"
+        >
+          <Link
+            href="/"
+            className={`btn btn-sm shrink-0 ${
               pathname === "/"
-                ? "bg-success text-white"
-                : "text-base-content/70 hover:bg-success/10 hover:text-success"
+                ? "btn-success"
+                : "btn-ghost"
             }`}
           >
             সব পণ্য
           </Link>
 
           {categories.map((category) => {
-            const slug = category.slug || category.id;
-            const label =
-              category.nameBn ||
-              category.name ||
-              category.title ||
-              "ক্যাটাগরি";
+            const active = pathname === `/category/${category.slug}`;
 
             return (
               <Link
-                key={slug}
-                href={`/category/${slug}`}
-                aria-current={
-                  isCategoryActive(slug) ? "page" : undefined
-                }
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  isCategoryActive(slug)
-                    ? "bg-success text-white"
-                    : "text-base-content/70 hover:bg-success/10 hover:text-success"
+                key={category.slug}
+                href={`/category/${encodeURIComponent(category.slug)}`}
+                className={`btn btn-sm shrink-0 ${
+                  active ? "btn-success" : "btn-ghost"
                 }`}
               >
-                {category.icon || "🛒"} {label}
+                <span>{category.icon}</span>
+                {category.name}
               </Link>
             );
           })}
+        </nav>
+      </div>
 
-          {/* Mobile authentication links */}
-          <div className="mt-2 flex gap-2 border-t border-base-200 pt-3 sm:hidden">
-            <Link
-              href="/signin"
-              className="btn btn-outline btn-success btn-sm flex-1"
-            >
-              সাইন ইন
-            </Link>
+      <div
+        className="overflow-hidden border-t border-base-200 bg-base-200/70"
+        aria-label="আজকের পণ্যের দামের পরিবর্তন"
+      >
+        <div className="flex min-h-10 items-center gap-6 overflow-hidden px-3">
+          {tickerProducts.length ? (
+            <div className="bazar-ticker-track flex w-max shrink-0 items-center gap-8 whitespace-nowrap py-2">
+              {[...tickerProducts, ...tickerProducts].map(
+                (product, index) => {
+                  const change = Number(product.changePercent) || 0;
 
-            <Link
-              href="/signup"
-              className="btn btn-success btn-sm flex-1 text-white"
-            >
-              সাইন আপ
-            </Link>
-          </div>
-        </div>
-      </nav>
+                  const color =
+                    change > 0
+                      ? "text-rose-600"
+                      : change < 0
+                        ? "text-emerald-600"
+                        : "text-base-content/60";
 
-      {/* Infinite scrolling price ticker */}
-      <div className="ticker-shell bg-neutral text-neutral-content">
-        <div className="ticker-heading">
-          <span className="text-lg">📊</span>
-
-          <span className="whitespace-nowrap text-xs font-bold sm:text-sm">
-            আজকের বাজারদর
-          </span>
-        </div>
-
-        <div className="ticker-viewport">
-          {products.length > 0 ? (
-            <div className="ticker-track">
-              {[0, 1].map((copy) => (
-                <div
-                  key={copy}
-                  className="ticker-group"
-                  aria-hidden={copy === 1}
-                >
-                  {products.map((product, index) =>
-                    renderTickerItem(product, index, copy)
-                  )}
-                </div>
-              ))}
+                  return (
+                    <span
+                      key={`${product.id}-${index}`}
+                      className="inline-flex items-center gap-2 text-xs sm:text-sm"
+                    >
+                      <span>{getProductEmoji(product)}</span>
+                      <span className="font-semibold">
+                        {product.name}
+                      </span>
+                      <span className="font-bold">
+                        {formatPrice(product.price)} টাকা
+                        {product.unit ? ` / ${product.unit}` : ""}
+                      </span>
+                      <span className={`font-bold ${color}`}>
+                        {change > 0
+                          ? "▲"
+                          : change < 0
+                            ? "▼"
+                            : "—"}
+                        {" "}
+                        {formatPrice(Math.abs(change))}%
+                      </span>
+                    </span>
+                  );
+                }
+              )}
             </div>
           ) : (
-            <div className="flex h-full items-center px-4 text-sm text-white/70">
-              বাজারদরের তথ্য লোড হচ্ছে…
-            </div>
+            <p className="py-2 text-xs text-base-content/60">
+              আজকের পণ্যের দাম লোড হচ্ছে...
+            </p>
           )}
         </div>
       </div>
