@@ -6,7 +6,7 @@ import {
 } from "@/lib/bazardor";
 
 export default function ProductCard({ product }) {
-  const change = Number(product.changePercent) || 0;
+  const change = Number(product.changePercent ?? 0);
 
   const changeStyle =
     change > 0

@@ -5,6 +5,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import {
+  getProducts,
+  getProductEmoji,
+  formatPrice,
+} from "@/lib/bazardor";
+
 const API_BASE =
   "https://openapi.programming-hero.com/api/bazardor";
 
@@ -19,64 +25,6 @@ const FALLBACK_CATEGORIES = [
   { id: "mosla", slug: "mosla", nameBn: "মসলা", icon: "🌶️" },
 ];
 
-const toBanglaNumber = (value) =>
-  String(value).replace(/\d/g, (digit) => "০১২৩৪৫৬৭৮৯"[digit]);
-
-function getProductName(product) {
-  return (
-    product.nameBn ||
-    product.name ||
-    product.title ||
-    "পণ্য"
-  );
-}
-
-function getProductPrice(product) {
-  return (
-    product.currentPrice ??
-    product.todayPrice ??
-    product.priceToday ??
-    product.price ??
-    product.averagePrice ??
-    product.minPrice ??
-    0
-  );
-}
-
-function getProductUnit(product) {
-  return (
-    product.unitBn ||
-    product.unit ||
-    product.unitName ||
-    "প্রতি কেজি"
-  );
-}
-
-function getProductChange(product) {
-  return Number(
-    product.changePercent ??
-    product.priceChangePercent ??
-    product.change ??
-    0
-  );
-}
-
-function getProductEmoji(product) {
-  return product.icon || product.emoji || product.imageEmoji || "🛒";
-}
-
-function formatPrice(value) {
-  const number = Number(value);
-
-  if (!Number.isFinite(number)) return "০";
-
-  return toBanglaNumber(
-    new Intl.NumberFormat("en-US", {
-      maximumFractionDigits: 2,
-    }).format(number)
-  );
-}
-
 function getBanglaDate() {
   return new Intl.DateTimeFormat("bn-BD-u-ca-bengali", {
     weekday: "long",
@@ -89,7 +37,6 @@ function getBanglaDate() {
 function getArray(payload) {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.data)) return payload.data;
-  if (Array.isArray(payload?.products)) return payload.products;
   if (Array.isArray(payload?.categories)) return payload.categories;
   return [];
 }
@@ -107,24 +54,25 @@ export default function Navbar() {
   useEffect(() => {
     setBanglaDate(getBanglaDate());
 
+    let cancelled = false;
+
     async function loadNavbarData() {
       try {
-        const [categoryResponse, productResponse] =
-          await Promise.all([
-            fetch(`${API_BASE}/categories`),
-            fetch(`${API_BASE}/products`),
-          ]);
+        // Categories come from their endpoint.
+        // Products use the shared normalizer from bazardor.js.
+        const [categoryResponse, productData] = await Promise.all([
+          fetch(`${API_BASE}/categories`),
+          getProducts(),
+        ]);
 
-        if (!categoryResponse.ok || !productResponse.ok) {
-          throw new Error("Could not load market data");
+        if (!categoryResponse.ok) {
+          throw new Error("ক্যাটাগরির তথ্য লোড করা যায়নি।");
         }
 
-        const categoryData = getArray(
-          await categoryResponse.json()
-        );
-        const productData = getArray(
-          await productResponse.json()
-        );
+        const categoryPayload = await categoryResponse.json();
+        const categoryData = getArray(categoryPayload);
+
+        if (cancelled) return;
 
         if (categoryData.length > 0) {
           setCategories(categoryData);
@@ -132,11 +80,17 @@ export default function Navbar() {
 
         setProducts(productData);
       } catch (error) {
-        console.error("Navbar API error:", error);
+        if (!cancelled) {
+          console.error("Navbar API error:", error);
+        }
       }
     }
 
     loadNavbarData();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -146,70 +100,48 @@ export default function Navbar() {
   const isCategoryActive = (slug) =>
     pathname === `/category/${slug}`;
 
-  const tickerProducts = products.length
-    ? products
-    : [
-        {
-          id: "sample-rice",
-          nameBn: "চাল",
-          icon: "🍚",
-          currentPrice: 72,
-          unitBn: "প্রতি কেজি",
-          changePercent: 2.1,
-        },
-        {
-          id: "sample-potato",
-          nameBn: "আলু",
-          icon: "🥔",
-          currentPrice: 35,
-          unitBn: "প্রতি কেজি",
-          changePercent: -1.5,
-        },
-        {
-          id: "sample-onion",
-          nameBn: "পেঁয়াজ",
-          icon: "🧅",
-          currentPrice: 60,
-          unitBn: "প্রতি কেজি",
-          changePercent: 0,
-        },
-      ];
-
   function renderTickerItem(product, index, copy) {
-    const change = getProductChange(product);
-    const productId = product.id ?? product._id;
+    const change = Number(product.changePercent ?? 0);
+    const productId = product.id || product.slug;
+
+    const changeColor =
+      change > 0
+        ? "font-bold text-lime-300"
+        : change < 0
+          ? "font-bold text-rose-300"
+          : "font-bold text-gray-300";
+
+    const arrow =
+      change > 0 ? "▲" : change < 0 ? "▼" : "—";
+
+    const unit = String(product.unit || "একক উল্লেখ নেই")
+      .replace(/^প্রতি\s*/, "");
 
     return (
       <Link
-        key={`${copy}-${productId ?? index}`}
-        href={productId ? `/product/${productId}` : "/"}
+        key={`${copy}-${productId || index}`}
+        href={
+          productId
+            ? `/product/${encodeURIComponent(product.slug || product.id)}`
+            : "/"
+        }
         className="ticker-item"
-        aria-label={`${getProductName(product)} এর দাম`}
+        aria-label={`${product.name} এর দাম`}
       >
         <span className="text-xl">
           {getProductEmoji(product)}
         </span>
 
         <span className="font-semibold">
-          {getProductName(product)}
+          {product.name}
         </span>
 
-        <span className="text-white/80">
-          {formatPrice(getProductPrice(product))} টাকা/
-          {getProductUnit(product)}
+        <span className="whitespace-nowrap text-white/80">
+          {formatPrice(product.price)} টাকা/{unit}
         </span>
 
-        <span
-          className={
-            change > 0
-              ? "font-bold text-lime-300"
-              : change < 0
-                ? "font-bold text-rose-300"
-                : "font-bold text-gray-300"
-          }
-        >
-          {change > 0 ? "▲" : change < 0 ? "▼" : "—"}{" "}
-          {formatPrice(Math.abs(change))}%
+        <span className={changeColor}>
+          {arrow} {formatPrice(Math.abs(change))}%
         </span>
       </Link>
     );
@@ -217,7 +149,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 bg-base-100 shadow-sm">
-
+      {/* Logo, date, and authentication links */}
       <div className="border-b border-base-200">
         <div className="navbar mx-auto min-h-20 max-w-6xl px-4">
           <div className="flex-1">
@@ -306,6 +238,7 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* Category navigation */}
       <nav
         aria-label="পণ্যের ক্যাটাগরি"
         className={`border-b border-base-200 ${
@@ -329,7 +262,8 @@ export default function Navbar() {
             const label =
               category.nameBn ||
               category.name ||
-              category.title;
+              category.title ||
+              "ক্যাটাগরি";
 
             return (
               <Link
@@ -349,6 +283,7 @@ export default function Navbar() {
             );
           })}
 
+          {/* Mobile authentication links */}
           <div className="mt-2 flex gap-2 border-t border-base-200 pt-3 sm:hidden">
             <Link
               href="/signin"
@@ -367,29 +302,36 @@ export default function Navbar() {
         </div>
       </nav>
 
-  
+      {/* Infinite scrolling price ticker */}
       <div className="ticker-shell bg-neutral text-neutral-content">
         <div className="ticker-heading">
           <span className="text-lg">📊</span>
+
           <span className="whitespace-nowrap text-xs font-bold sm:text-sm">
             আজকের বাজারদর
           </span>
         </div>
 
         <div className="ticker-viewport">
-          <div className="ticker-track">
-            {[0, 1].map((copy) => (
-              <div
-                key={copy}
-                className="ticker-group"
-                aria-hidden={copy === 1}
-              >
-                {tickerProducts.map((product, index) =>
-                  renderTickerItem(product, index, copy)
-                )}
-              </div>
-            ))}
-          </div>
+          {products.length > 0 ? (
+            <div className="ticker-track">
+              {[0, 1].map((copy) => (
+                <div
+                  key={copy}
+                  className="ticker-group"
+                  aria-hidden={copy === 1}
+                >
+                  {products.map((product, index) =>
+                    renderTickerItem(product, index, copy)
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex h-full items-center px-4 text-sm text-white/70">
+              বাজারদরের তথ্য লোড হচ্ছে…
+            </div>
+          )}
         </div>
       </div>
     </header>
