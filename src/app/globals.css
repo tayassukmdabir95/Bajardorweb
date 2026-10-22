@@ -1,4 +1,98 @@
+
 @import "tailwindcss";
+@plugin "daisyui";
+
+
+/* BazarDor price ticker */
+
+.ticker-shell {
+  display: flex;
+  align-items: stretch;
+  min-height: 52px;
+  overflow: hidden;
+}
+
+.ticker-heading {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  background: #25452e;
+}
+
+.ticker-viewport {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: bazardor-ticker-scroll 45s linear infinite;
+}
+
+.ticker-group {
+  display: flex;
+  width: max-content;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.ticker-item {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  white-space: nowrap;
+  font-size: 13px;
+  transition: opacity 150ms ease;
+}
+
+.ticker-item:hover {
+  opacity: 0.8;
+}
+
+.ticker-shell:hover .ticker-track {
+  animation-play-state: paused;
+}
+
+@keyframes bazardor-ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 640px) {
+  .ticker-heading {
+    gap: 5px;
+    padding: 0 9px;
+  }
+
+  .ticker-item {
+    gap: 6px;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track {
+    animation: none;
+  }
+}
+
+
 
 :root {
   --background: #ffffff;

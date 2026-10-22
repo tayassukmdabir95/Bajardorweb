@@ -1,0 +1,397 @@
+
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+const API_BASE =
+  "https://openapi.programming-hero.com/api/bazardor";
+
+const FALLBACK_CATEGORIES = [
+  { id: "chal", slug: "chal", nameBn: "চাল", icon: "🍚" },
+  { id: "dal", slug: "dal", nameBn: "ডাল", icon: "🫘" },
+  { id: "tel", slug: "tel", nameBn: "তেল", icon: "🛢️" },
+  { id: "sobji", slug: "sobji", nameBn: "সবজি", icon: "🥬" },
+  { id: "mach", slug: "mach", nameBn: "মাছ", icon: "🐟" },
+  { id: "mangsho", slug: "mangsho", nameBn: "মাংস", icon: "🍗" },
+  { id: "dim-dui", slug: "dim-dui", nameBn: "ডিম-দুধ", icon: "🥛" },
+  { id: "mosla", slug: "mosla", nameBn: "মসলা", icon: "🌶️" },
+];
+
+const toBanglaNumber = (value) =>
+  String(value).replace(/\d/g, (digit) => "০১২৩৪৫৬৭৮৯"[digit]);
+
+function getProductName(product) {
+  return (
+    product.nameBn ||
+    product.name ||
+    product.title ||
+    "পণ্য"
+  );
+}
+
+function getProductPrice(product) {
+  return (
+    product.currentPrice ??
+    product.todayPrice ??
+    product.priceToday ??
+    product.price ??
+    product.averagePrice ??
+    product.minPrice ??
+    0
+  );
+}
+
+function getProductUnit(product) {
+  return (
+    product.unitBn ||
+    product.unit ||
+    product.unitName ||
+    "প্রতি কেজি"
+  );
+}
+
+function getProductChange(product) {
+  return Number(
+    product.changePercent ??
+    product.priceChangePercent ??
+    product.change ??
+    0
+  );
+}
+
+function getProductEmoji(product) {
+  return product.icon || product.emoji || product.imageEmoji || "🛒";
+}
+
+function formatPrice(value) {
+  const number = Number(value);
+
+  if (!Number.isFinite(number)) return "০";
+
+  return toBanglaNumber(
+    new Intl.NumberFormat("en-US", {
+      maximumFractionDigits: 2,
+    }).format(number)
+  );
+}
+
+function getBanglaDate() {
+  return new Intl.DateTimeFormat("bn-BD-u-ca-bengali", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
+}
+
+function getArray(payload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.products)) return payload.products;
+  if (Array.isArray(payload?.categories)) return payload.categories;
+  return [];
+}
+
+export default function Navbar() {
+  const pathname = usePathname();
+
+  const [categories, setCategories] = useState(
+    FALLBACK_CATEGORIES
+  );
+  const [products, setProducts] = useState([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [banglaDate, setBanglaDate] = useState("");
+
+  useEffect(() => {
+    setBanglaDate(getBanglaDate());
+
+    async function loadNavbarData() {
+      try {
+        const [categoryResponse, productResponse] =
+          await Promise.all([
+            fetch(`${API_BASE}/categories`),
+            fetch(`${API_BASE}/products`),
+          ]);
+
+        if (!categoryResponse.ok || !productResponse.ok) {
+          throw new Error("Could not load market data");
+        }
+
+        const categoryData = getArray(
+          await categoryResponse.json()
+        );
+        const productData = getArray(
+          await productResponse.json()
+        );
+
+        if (categoryData.length > 0) {
+          setCategories(categoryData);
+        }
+
+        setProducts(productData);
+      } catch (error) {
+        console.error("Navbar API error:", error);
+      }
+    }
+
+    loadNavbarData();
+  }, []);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  const isCategoryActive = (slug) =>
+    pathname === `/category/${slug}`;
+
+  const tickerProducts = products.length
+    ? products
+    : [
+        {
+          id: "sample-rice",
+          nameBn: "চাল",
+          icon: "🍚",
+          currentPrice: 72,
+          unitBn: "প্রতি কেজি",
+          changePercent: 2.1,
+        },
+        {
+          id: "sample-potato",
+          nameBn: "আলু",
+          icon: "🥔",
+          currentPrice: 35,
+          unitBn: "প্রতি কেজি",
+          changePercent: -1.5,
+        },
+        {
+          id: "sample-onion",
+          nameBn: "পেঁয়াজ",
+          icon: "🧅",
+          currentPrice: 60,
+          unitBn: "প্রতি কেজি",
+          changePercent: 0,
+        },
+      ];
+
+  function renderTickerItem(product, index, copy) {
+    const change = getProductChange(product);
+    const productId = product.id ?? product._id;
+
+    return (
+      <Link
+        key={`${copy}-${productId ?? index}`}
+        href={productId ? `/product/${productId}` : "/"}
+        className="ticker-item"
+        aria-label={`${getProductName(product)} এর দাম`}
+      >
+        <span className="text-xl">
+          {getProductEmoji(product)}
+        </span>
+
+        <span className="font-semibold">
+          {getProductName(product)}
+        </span>
+
+        <span className="text-white/80">
+          {formatPrice(getProductPrice(product))} টাকা/
+          {getProductUnit(product)}
+        </span>
+
+        <span
+          className={
+            change > 0
+              ? "font-bold text-lime-300"
+              : change < 0
+                ? "font-bold text-rose-300"
+                : "font-bold text-gray-300"
+          }
+        >
+          {change > 0 ? "▲" : change < 0 ? "▼" : "—"}{" "}
+          {formatPrice(Math.abs(change))}%
+        </span>
+      </Link>
+    );
+  }
+
+  return (
+    <header className="sticky top-0 z-50 bg-base-100 shadow-sm">
+
+      <div className="border-b border-base-200">
+        <div className="navbar mx-auto min-h-20 max-w-6xl px-4">
+          <div className="flex-1">
+            <Link
+              href="/"
+              className="flex items-center gap-3"
+              aria-label="বাজার দর হোম পেজ"
+            >
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-success/15 text-3xl">
+                🛒
+              </span>
+
+              <span>
+                <span className="block text-xl font-extrabold tracking-tight text-success sm:text-2xl">
+                  বাজার দর
+                </span>
+
+                <span className="block text-xs text-base-content/60">
+                  {banglaDate || "বাংলা তারিখ"}
+                </span>
+              </span>
+            </Link>
+          </div>
+
+          <div className="hidden items-center gap-2 sm:flex">
+            <Link
+              href="/signin"
+              className="btn btn-ghost btn-sm sm:btn-md"
+            >
+              সাইন ইন
+            </Link>
+
+            <Link
+              href="/signup"
+              className="btn btn-success btn-sm text-white sm:btn-md"
+            >
+              সাইন আপ
+            </Link>
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-ghost btn-square sm:hidden"
+            aria-label={
+              mobileMenuOpen
+                ? "মেনু বন্ধ করুন"
+                : "মেনু খুলুন"
+            }
+            aria-expanded={mobileMenuOpen}
+            onClick={() =>
+              setMobileMenuOpen((previous) => !previous)
+            }
+          >
+            {mobileMenuOpen ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18 18 6M6 6l12 12"
+                />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            )}
+          </button>
+        </div>
+      </div>
+
+      <nav
+        aria-label="পণ্যের ক্যাটাগরি"
+        className={`border-b border-base-200 ${
+          mobileMenuOpen ? "block" : "hidden"
+        } sm:block`}
+      >
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-center sm:gap-2">
+          <Link
+            href="/"
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+              pathname === "/"
+                ? "bg-success text-white"
+                : "text-base-content/70 hover:bg-success/10 hover:text-success"
+            }`}
+          >
+            সব পণ্য
+          </Link>
+
+          {categories.map((category) => {
+            const slug = category.slug || category.id;
+            const label =
+              category.nameBn ||
+              category.name ||
+              category.title;
+
+            return (
+              <Link
+                key={slug}
+                href={`/category/${slug}`}
+                aria-current={
+                  isCategoryActive(slug) ? "page" : undefined
+                }
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  isCategoryActive(slug)
+                    ? "bg-success text-white"
+                    : "text-base-content/70 hover:bg-success/10 hover:text-success"
+                }`}
+              >
+                {category.icon || "🛒"} {label}
+              </Link>
+            );
+          })}
+
+          <div className="mt-2 flex gap-2 border-t border-base-200 pt-3 sm:hidden">
+            <Link
+              href="/signin"
+              className="btn btn-outline btn-success btn-sm flex-1"
+            >
+              সাইন ইন
+            </Link>
+
+            <Link
+              href="/signup"
+              className="btn btn-success btn-sm flex-1 text-white"
+            >
+              সাইন আপ
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+  
+      <div className="ticker-shell bg-neutral text-neutral-content">
+        <div className="ticker-heading">
+          <span className="text-lg">📊</span>
+          <span className="whitespace-nowrap text-xs font-bold sm:text-sm">
+            আজকের বাজারদর
+          </span>
+        </div>
+
+        <div className="ticker-viewport">
+          <div className="ticker-track">
+            {[0, 1].map((copy) => (
+              <div
+                key={copy}
+                className="ticker-group"
+                aria-hidden={copy === 1}
+              >
+                {tickerProducts.map((product, index) =>
+                  renderTickerItem(product, index, copy)
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
