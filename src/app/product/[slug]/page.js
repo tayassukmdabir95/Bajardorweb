@@ -13,20 +13,21 @@ import {
 export default async function ProductPage({ params }) {
   const { slug } = await params;
 
-  // Protect this page: users must be signed in.
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
 
-  if (!session) {
-    redirect(`/signin?callbackURL=${encodeURIComponent(`/product/${slug}`)}`);
-  }
 
-  const product = await getProductBySlug(decodeURIComponent(slug));
+const product = await getProductBySlug(decodeURIComponent(slug));
+if (!product) {
+  notFound();
+}
+const session = await auth.api.getSession({
+  headers: await headers(),
+});
+if (!session) {
+  redirect(
+    `/signin?callbackURL=${encodeURIComponent(`/product/${slug}`)}`
+  );
+}
 
-  if (!product) {
-    notFound();
-  }
 
   const marketPrices = (product.markets || [])
     .map((market) => {
