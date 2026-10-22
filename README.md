@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# বাজার দর (BazarDor)
+
+**A web application for exploring daily essential commodity prices in Bangladesh.**
+
+## Project Overview
+
+বাজার দর (BazarDor) is a responsive web application that helps users explore the prices of essential commodities across different categories. Users can view current prices, compare price changes, sort products by price, and access detailed product information, including market-wise price ranges.
+
+The application provides user authentication and profile management, allowing users to register, sign in, and update their profile information.
+
+## Technologies Used
+
+- **Next.js** — React framework and App Router for application routing and page rendering.
+- **React** — Component-based user interface development.
+- **JavaScript** — Application logic and interactive functionality.
+- **Tailwind CSS** — Responsive styling and layout.
+- **DaisyUI** — Prebuilt UI components and styling utilities.
+- **Better Auth** — Email/password authentication and Google and GitHub social login.
+- **MongoDB** — Database for authentication and user-related data.
+- **React Hot Toast** — Notifications for authentication, validation, and other user actions.
+- **External REST API** — Retrieval of product, category, and pricing information.
+
+## Key Features
+
+### 1. Daily Commodity Price Dashboard
+Displays essential products with their names, units, current prices, and percentage changes. Price changes are indicated using visual badges to make increases and decreases easy to identify.
+
+### 2. Price Trends and Product Categories
+Highlights products with rising and falling prices. Users can browse products by category and sort them by default order, ascending price, or descending price.
+
+### 3. Product Details and Market-Wise Prices
+Provides individual product detail pages with current and previous prices, minimum and maximum price ranges, average prices, and available market-wise pricing information.
+
+### 4. User Authentication and Social Login
+Supports account registration and sign-in using email and password, as well as Google and GitHub authentication. Protected product details require users to sign in.
+
+### 5. User Profile Management
+Allows authenticated users to view their profile and update their name through a dedicated form.
+
+### 6. Responsive User Interface
+Designed for mobile phones, tablets, and desktop screens, with responsive navigation, product grids, and page layouts.
+
+### 7. Loading States and Error Handling
+Uses skeleton loading interfaces, toast notifications, and friendly error pages to improve usability during loading, authentication, and invalid-route scenarios.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Make sure you have the following installed:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Node.js
+- npm
+- Git
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+You will also need a MongoDB database and the credentials for any social login providers you want to enable.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Installation
 
-## Learn More
+1. Clone the repository:
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   git clone YOUR_GITHUB_REPOSITORY_URL
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. Navigate to the project directory:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   cd bazar-dor
+   ```
 
-## Deploy on Vercel
+3. Install the dependencies:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   ```bash
+   npm install
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Create a `.env.local` file in the project root and configure the required environment variables:
+
+   ```env
+   BETTER_AUTH_URL=http://localhost:3000
+   BETTER_AUTH_SECRET=your_generated_secret
+   MONGODB_URI=your_mongodb_connection_string
+
+   GOOGLE_CLIENT_ID=your_google_client_id
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+   GITHUB_CLIENT_ID=your_github_client_id
+   GITHUB_CLIENT_SECRET=your_github_client_secret
+   ```
+
+   Replace the placeholder values with your own credentials. Configure the Google and GitHub credentials if you intend to use those providers. Never commit `.env.local` or expose your secrets in the repository.
+
+5. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+6. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Data Source
+
+Product and category information is retrieved from the BazarDor REST API provided for this project:
+
+`https://openapi.programming-hero.com/api/bazardor`
+
+The availability and accuracy of displayed prices depend on the API data.
+
+## Deployment
+
+The application can be deployed to Vercel or another compatible hosting platform.
+
+Before deployment, configure the required environment variables in the hosting platform, update the Better Auth base URL, and configure the Google and GitHub OAuth callback URLs for the production domain.
+
+## Project Status
+
+BazarDor is developed as a responsive web application for browsing essential commodity prices, comparing price changes, and managing user accounts.
