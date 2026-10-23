@@ -192,56 +192,62 @@ export default function CategoryProducts({ slug }) {
     );
   }
 
-  return (
-    <main className="mx-auto min-h-[60vh] max-w-6xl px-4 py-10 sm:py-14">
-      <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm font-semibold text-success">
-            বাজার দর / ক্যাটাগরি
-          </p>
-
-          <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">
-            <span className="mr-2" aria-hidden="true">
-              {category.icon ?? "🛒"}
-            </span>
-            {getCategoryName(category)}
-          </h1>
-
-          <p className="mt-2 text-sm text-base-content/60">
-            এই ক্যাটাগরির {categoryProducts.length}টি পণ্যের আজকের দাম দেখুন।
-          </p>
+return (
+    <main className="min-h-screen bg-[#f4f7f5] px-4 py-8 font-sans">
+      <div className="mx-auto max-w-6xl text-gray-900">
+        
+        {/* Category Header Card */}
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-4 flex items-center gap-5 shadow-sm">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#f0f3f1] text-3xl">
+            <span aria-hidden="true">{category.icon ?? "🛒"}</span>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {getCategoryName(category)}
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              প্রতি পণ্যের আজকের দাম ও পরিবর্তন
+            </p>
+          </div>
         </div>
 
-        <label className="form-control w-full sm:w-64">
-          <span className="label-text mb-2 font-semibold">
+        {/* Sorting Bar */}
+        <div className="bg-white border border-gray-200 rounded-2xl px-6 py-4 mb-8 flex justify-end items-center shadow-sm">
+          <label className="flex items-center gap-3 text-sm font-medium text-gray-600 cursor-pointer">
             সাজান
-          </span>
-
-          <select
-            className="select select-bordered w-full"
-            value={sortOrder}
-            onChange={(event) => setSortOrder(event.target.value)}
-            aria-label="পণ্যের দাম অনুযায়ী সাজান"
-          >
-            <option value="default">ডিফল্ট</option>
-            <option value="asc">দাম: কম থেকে বেশি</option>
-            <option value="desc">দাম: বেশি থেকে কম</option>
-          </select>
-        </label>
-      </div>
-
-      {categoryProducts.length === 0 ? (
-        <EmptyState title="এই ক্যাটাগরিতে কোনো পণ্য নেই" />
-      ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {categoryProducts.map((product) => (
-            <ProductCard
-              key={product.id || product.slug}
-              product={product}
-            />
-          ))}
+            <select
+              className="select select-sm select-bordered bg-gray-50 border-gray-200 text-gray-700 focus:outline-none focus:border-[#0c8a43] focus:ring-1 focus:ring-[#0c8a43] min-w-[120px]"
+              value={sortOrder}
+              onChange={(event) => setSortOrder(event.target.value)}
+              aria-label="পণ্যের দাম অনুযায়ী সাজান"
+            >
+              <option value="default">ডিফল্ট</option>
+              <option value="asc">দাম: কম থেকে বেশি</option>
+              <option value="desc">দাম: বেশি থেকে কম</option>
+            </select>
+          </label>
         </div>
-      )}
+
+        {categoryProducts.length === 0 ? (
+          <EmptyState title="এই ক্যাটাগরিতে কোনো পণ্য নেই" />
+        ) : (
+          <div>
+            {/* Product Count Text */}
+            <p className="text-sm font-medium text-gray-500 mb-4 px-1">
+              মোট {categoryProducts.length}টি পণ্য দেখানো হচ্ছে
+            </p>
+            
+            {/* Products Grid */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {categoryProducts.map((product) => (
+                <ProductCard
+                  key={product.id || product.slug}
+                  product={product}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </main>
-  );
-}
+  );}

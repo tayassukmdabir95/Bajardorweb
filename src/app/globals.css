@@ -1,7 +1,23 @@
 
 @import "tailwindcss";
-@plugin "daisyui";
 
+@plugin "daisyui" {
+  themes: light --default;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background-color: #ffffff;
+  color: #171717;
+}
 
 
 @keyframes bazar-ticker-scroll {
