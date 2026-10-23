@@ -1,24 +1,28 @@
+
 import { MongoClient } from "mongodb";
 
 const uri = process.env.MONGODB_URI;
 
 if (!uri) {
-  throw new Error("MONGODB_URI is missing from .env.local");
+  throw new Error("MONGODB_URI is missing");
 }
 
-const options = {};
+const options = {
+  connectTimeoutMS: 10000,
+  serverSelectionTimeoutMS: 10000,
+  timeoutMS: 15000,
+};
 
-let client;
+const globalWithMongo = globalThis;
 
-if (process.env.NODE_ENV === "development") {
-  if (!global._mongoClient) {
-    global._mongoClient = new MongoClient(uri, options);
-  }
+const client =
+  globalWithMongo._mongoClient ??
+  new MongoClient(uri, options);
 
-  client = global._mongoClient;
-} else {
-  client = new MongoClient(uri, options);
+if (process.env.NODE_ENV !== "production") {
+  globalWithMongo._mongoClient = client;
 }
 
 export { client };
+
 export const db = client.db("bazardor");
