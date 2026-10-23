@@ -1,3 +1,4 @@
+
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { client, db } from "@/lib/mongodb";
@@ -24,10 +25,22 @@ if (
   };
 }
 
+const trustedOrigins = [
+  "http://localhost:3000",
+   "https://bajardorweb.netlify.app.netlify.app"
+];
+
+// Add your production domain from the BETTER_AUTH_URL environment variable.
+if (process.env.BETTER_AUTH_URL) {
+  trustedOrigins.push(process.env.BETTER_AUTH_URL);
+}
+
 export const auth = betterAuth({
   database: mongodbAdapter(db, { client }),
 
   baseURL: process.env.BETTER_AUTH_URL,
+
+  trustedOrigins,
 
   emailAndPassword: {
     enabled: true,
