@@ -15,14 +15,19 @@ const options = {
 
 const globalWithMongo = globalThis;
 
-const client =
-  globalWithMongo._mongoClient ??
-  new MongoClient(uri, options);
+const clientPromise =
+  globalWithMongo._mongoClientPromise ??
+  (async () => {
+    const client = new MongoClient(uri, options);
+    await client.connect();
+    return client;
+  })();
 
 if (process.env.NODE_ENV !== "production") {
-  globalWithMongo._mongoClient = client;
+  globalWithMongo._mongoClientPromise = clientPromise;
 }
 
-export { client };
+const client = await clientPromise;
 
+export { client };
 export const db = client.db("bazardor");
