@@ -10,24 +10,19 @@ if (!uri) {
 const options = {
   connectTimeoutMS: 10000,
   serverSelectionTimeoutMS: 10000,
-  timeoutMS: 15000,
 };
 
 const globalWithMongo = globalThis;
 
-const clientPromise =
-  globalWithMongo._mongoClientPromise ??
-  (async () => {
-    const client = new MongoClient(uri, options);
-    await client.connect();
-    return client;
-  })();
+const client =
+  globalWithMongo._mongoClient ??
+  new MongoClient(uri, options);
 
-if (process.env.NODE_ENV !== "production") {
-  globalWithMongo._mongoClientPromise = clientPromise;
+// Reuse the client during development and in warm production instances.
+if (!globalWithMongo._mongoClient) {
+  globalWithMongo._mongoClient = client;
 }
 
-const client = await clientPromise;
-
 export { client };
+
 export const db = client.db("bazardor");
