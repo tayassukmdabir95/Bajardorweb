@@ -64,7 +64,7 @@ export function normalizeProduct(product = {}) {
   const today = Number(product.today);
   const yesterday = Number(product.yesterday);
 
-  // The API provides positive percentages and a direction separately.
+ 
   const rawPercent = Number(product.change?.pct ?? 0);
   const direction = product.change?.dir ?? "flat";
 
@@ -112,12 +112,12 @@ export function normalizeProduct(product = {}) {
 
     unit: normalizeUnit(product.unit),
 
-    // In this API, the emoji is stored in "image".
+
     emoji: String(
       firstValue(product.image, product.emoji, product.icon, "🛒")
     ),
 
-    // Use the real API price fields.
+  
     price: Number.isFinite(today) ? today : null,
     previousPrice: Number.isFinite(yesterday) ? yesterday : null,
 
@@ -127,7 +127,7 @@ export function normalizeProduct(product = {}) {
 
     changeDirection: direction,
 
-    // Keep historical prices and market data available for detail pages.
+   
     lastWeek: product.lastWeek ?? null,
     lastMonth: product.lastMonth ?? null,
     markets: Array.isArray(product.markets)

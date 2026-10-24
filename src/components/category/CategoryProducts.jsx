@@ -196,7 +196,7 @@ return (
     <main className="min-h-screen bg-[#f4f7f5] px-4 py-8 font-sans">
       <div className="mx-auto max-w-6xl text-gray-900">
         
-        {/* Category Header Card */}
+  
         <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-4 flex items-center gap-5 shadow-sm">
           <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#f0f3f1] text-3xl">
             <span aria-hidden="true">{category.icon ?? "🛒"}</span>
@@ -211,7 +211,7 @@ return (
           </div>
         </div>
 
-        {/* Sorting Bar */}
+   
         <div className="bg-white border border-gray-200 rounded-2xl px-6 py-4 mb-8 flex justify-end items-center shadow-sm">
           <label className="flex items-center gap-3 text-sm font-medium text-gray-600 cursor-pointer">
             সাজান

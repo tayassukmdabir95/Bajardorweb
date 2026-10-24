@@ -129,12 +129,12 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-white">
-      {/* Hero banner */}
+     
       <section className="bg-[#f0f6f1] px-2 py-4 sm:px-4 sm:py-6">
         <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-5 rounded-xl border border-gray-200 bg-white px-4 py-5 sm:grid-cols-[1.35fr_0.65fr] sm:gap-6 sm:px-6 sm:py-6 lg:px-8">
-          {/* Hero text */}
+        
           <div className="flex flex-col items-start justify-center">
-            {/* Compact Bengali day and date */}
+           
             <div className="mb-3 inline-flex w-fit rounded-md bg-gray-100 px-2.5 py-1 text-sm font-semibold text-green-700">
               {bengaliDate}
             </div>
@@ -158,7 +158,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Hero illustration */}
+      
           <div className="flex items-center justify-center sm:justify-end">
             <Image
               src="/hero.png"
@@ -172,7 +172,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Product sections: same width as the hero */}
+    
       <div className="mx-auto w-full max-w-7xl px-2 sm:px-4">
         <ProductSection
           id="দাম-বেড়েছে"

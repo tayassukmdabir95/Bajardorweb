@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -42,21 +41,21 @@ export default function ProfilePage() {
               👤
             </div>
 
-            <h1 className="mt-2 text-3xl font-extrabold">
+            <h1 className="mt-2 text-3xl font-extrabold text-gray-950">
               আমার প্রোফাইল
             </h1>
 
             <div className="mt-5 w-full space-y-4 text-left">
               <div className="rounded-xl bg-base-200 p-4">
                 <p className="text-sm text-base-content/60">নাম</p>
-                <p className="mt-1 font-bold">
+                <p className="mt-1 font-bold text-gray-950">
                   {user.name || "নাম দেওয়া হয়নি"}
                 </p>
               </div>
 
               <div className="rounded-xl bg-base-200 p-4">
                 <p className="text-sm text-base-content/60">ইমেইল</p>
-                <p className="mt-1 break-all font-semibold">
+                <p className="mt-1 break-all font-semibold text-gray-950">
                   {user.email}
                 </p>
               </div>

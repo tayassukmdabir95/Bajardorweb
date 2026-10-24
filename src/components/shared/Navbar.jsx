@@ -117,7 +117,7 @@ export default function Navbar() {
     };
   }, []);
 
-  // Close the dropdown when clicking outside it or pressing Escape.
+
   useEffect(() => {
     function handleOutsideClick(event) {
       if (
@@ -169,7 +169,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white text-gray-900">
       <div className="mx-auto max-w-7xl px-3 sm:px-5 lg:px-8">
-        {/* Logo, date, and authentication */}
+       
         <div className="flex min-h-20 items-center justify-between gap-3 py-3">
           <Link
             href="/"
@@ -202,7 +202,7 @@ export default function Navbar() {
               <span className="loading loading-spinner loading-sm text-success" />
             ) : session ? (
               <div className="relative" ref={profileRef}>
-                {/* Profile dropdown trigger */}
+           
                 <button
                   type="button"
                   onClick={() => setProfileOpen((open) => !open)}
@@ -248,13 +248,13 @@ export default function Navbar() {
                   </svg>
                 </button>
 
-                {/* Dropdown card */}
+         
                 {profileOpen && (
                   <div
                     role="menu"
                     className="absolute right-0 top-full z-[60] mt-3 w-[min(320px,calc(100vw-24px))] overflow-hidden rounded-2xl border border-gray-100 bg-white p-2.5 text-gray-900 shadow-xl shadow-gray-900/10"
                   >
-                    {/* User information */}
+            
                     <div className="flex items-center gap-3 rounded-xl px-3 py-3">
                       {user?.image ? (
                         <Image
@@ -283,7 +283,7 @@ export default function Navbar() {
 
                     <div className="my-1 border-t border-gray-100" />
 
-                    {/* Profile link */}
+           
                     <Link
                       href="/profile"
                       role="menuitem"
@@ -308,7 +308,7 @@ export default function Navbar() {
                       <span>প্রোফাইল</span>
                     </Link>
 
-                    {/* Sign out */}
+                
                     <button
                       type="button"
                       role="menuitem"
@@ -354,7 +354,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Category navigation */}
+     
         <nav
           aria-label="পণ্যের বিভাগ"
           className="flex gap-2 overflow-x-auto border-t border-gray-100 py-2"
@@ -391,7 +391,7 @@ export default function Navbar() {
         </nav>
       </div>
 
-      {/* Price ticker */}
+ 
       <div
         className="overflow-hidden border-t border-gray-200 bg-gray-50"
         aria-label="আজকের পণ্যের দামের পরিবর্তন"

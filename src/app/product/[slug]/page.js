@@ -92,16 +92,16 @@ const marketPrices = (product.markets || [])
 
   const change = Number(product.changePercent) || 0;
   
-  // দামের পার্থক্য এবং টেক্সট নির্ধারণ
+  
   const previousPrice = product.previousPrice ?? product.price;
   const priceDiff = Math.abs(product.price - previousPrice);
   const changeStatusText = change > 0 ? "বেড়েছে" : change < 0 ? "কমেছে" : "অপরিবর্তিত আছে";
 
   const changeColor =
     change > 0
-      ? "text-[#e11d48]" // Red for price increase
+      ? "text-[#e11d48]" 
       : change < 0
-        ? "text-[#059669]" // Green for price decrease
+        ? "text-[#059669]" 
         : "text-gray-600";
 
   const categoryName = product.categoryName || product.category || "পণ্য";
@@ -110,7 +110,7 @@ const marketPrices = (product.markets || [])
     <main className="min-h-screen bg-[#f4f7f5] px-4 py-6 sm:py-10 font-sans">
       <div className="mx-auto max-w-6xl">
         
-        {/* Breadcrumbs */}
+        
         <div className="mb-6 flex items-center text-sm font-medium text-gray-500 gap-2">
           <Link href="/" className="hover:text-black transition-colors">
             হোম
@@ -121,17 +121,17 @@ const marketPrices = (product.markets || [])
           <span className="text-black">{product.name}</span>
         </div>
 
-        {/* Product overview Card */}
+      
         <section className="bg-white border border-gray-200 rounded-2xl shadow-sm mb-8">
           <div className="p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
             
             <div className="flex items-center gap-5">
-              {/* Product Emoji/Image Box */}
+             
               <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-[#f0f3f1] text-5xl">
                 {getProductEmoji(product)}
               </div>
 
-              {/* Product Info */}
+              
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
                   {product.name}
@@ -145,7 +145,7 @@ const marketPrices = (product.markets || [])
               </div>
             </div>
 
-            {/* Price Box */}
+          
             <div className="bg-[#f2f7f4] rounded-2xl p-5 min-w-[140px] text-center shrink-0">
               <p className="text-xs font-medium text-gray-500 mb-1">আজকের দাম</p>
               <div className="text-3xl font-bold text-gray-900 mb-1">
@@ -161,7 +161,7 @@ const marketPrices = (product.markets || [])
           </div>
         </section>
 
-        {/* Price summary */}
+    
         <section className="mb-10">
           <h2 className="mb-4 text-xl font-bold text-gray-900">
             দামের সারসংক্ষেপ
@@ -172,19 +172,19 @@ const marketPrices = (product.markets || [])
               {
                 title: "সর্বনিম্ন দাম",
                 value: minPrice,
-                style: "text-[#059669]", // Green
+                style: "text-[#059669]", 
                 subtitle: "সবচেয়ে কম দামের বাজার",
               },
               {
                 title: "সর্বোচ্চ দাম",
                 value: maxPrice,
-                style: "text-[#e11d48]", // Red
+                style: "text-[#e11d48]", 
                 subtitle: "সবচেয়ে বেশি দামের বাজার",
               },
               {
                 title: "গড় দাম",
                 value: averagePrice,
-                style: "text-[#059669]", // Green
+                style: "text-[#059669]", 
                 subtitle: `প্রতি ${product.unit}-এর হিসাবে`,
               },
             ].map((item) => (
@@ -208,7 +208,7 @@ const marketPrices = (product.markets || [])
           </div>
         </section>
 
-        {/* Market-wise prices */}
+       
         <section className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 sm:p-8">
           <div className="mb-6">
             <h2 className="text-xl font-bold text-gray-900">

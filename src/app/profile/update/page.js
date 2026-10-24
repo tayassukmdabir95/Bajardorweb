@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -72,30 +71,30 @@ export default function UpdateProfilePage() {
       <div className="mx-auto max-w-xl">
         <Link
           href="/profile"
-          className="mb-6 inline-block text-sm font-semibold text-success hover:underline"
+          className="mb-6 inline-block text-sm font-semibold text-green-800 hover:underline"
         >
           ← প্রোফাইলে ফিরে যান
         </Link>
 
         <section className="card border border-base-300 bg-base-100 shadow-sm">
           <div className="card-body p-6 sm:p-8">
-            <h1 className="text-2xl font-extrabold sm:text-3xl">
+            <h1 className="text-2xl font-extrabold text-gray-900 sm:text-3xl">
               তথ্য আপডেট করুন
             </h1>
 
-            <p className="text-sm text-base-content/60">
+            <p className="text-sm text-gray-700">
               আপনার প্রোফাইলের নাম পরিবর্তন করুন।
             </p>
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
               <label className="form-control w-full">
-                <span className="label-text mb-2 font-semibold">
+                <span className="label-text mb-2 font-semibold text-gray-900">
                   নাম
                 </span>
 
                 <input
                   type="text"
-                  className="input input-bordered w-full"
+                  className="input input-bordered w-full text-gray-900 placeholder:text-gray-500"
                   placeholder="আপনার নাম লিখুন"
                   value={name}
                   onChange={(event) => setName(event.target.value)}

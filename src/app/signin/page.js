@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -61,22 +60,21 @@ export default function SigninPage() {
 
   return (
     <main className="flex min-h-[75vh] items-center justify-center bg-[#f1f6f1] px-4 py-10">
-      {/* Sign-in card */}
+     
       <div className="w-full max-w-[440px] rounded-[17px] border border-[#dce9dc] bg-[#fbfdfb] p-5 shadow-[0_4px_18px_rgba(30,70,40,0.04)] sm:p-[26px]">
         <div className="flex flex-col gap-5">
-          {/* Heading */}
+        
           <div className="text-center">
-            
-
             <h1 className="text-2xl font-extrabold tracking-tight text-[#20372a] sm:text-3xl">
               সাইন ইন
             </h1>
 
             <p className="mt-2 text-sm leading-6 text-[#65766a]">
-                 বিস্তারিত দাম, বাজার তুলনা ও প্রোফাইল দেখতে অ্যাকাউন্টে ঢুকুন।            </p>
+              বিস্তারিত দাম, বাজার তুলনা ও প্রোফাইল দেখতে অ্যাকাউন্টে ঢুকুন।
+            </p>
           </div>
 
-          {/* Email and password form */}
+      
           <form onSubmit={handleSignin} className="space-y-4">
             <label className="block w-full">
               <span className="mb-2 block text-sm font-semibold text-[#304638]">
@@ -84,7 +82,7 @@ export default function SigninPage() {
               </span>
 
               <input
-                className="h-[43px] w-full rounded-[10px] border border-[#d5e2d6] bg-white px-3 text-sm text-[#24372a] outline-none transition placeholder:text-[#9aa99d] focus:border-[#008747] focus:ring-2 focus:ring-[#008747]/10"
+                className="h-[43px] w-full rounded-[10px] border border-[#d5e2d6] bg-white px-3 text-sm !text-black outline-none transition placeholder:text-[#9aa99d] focus:border-[#008747] focus:ring-2 focus:ring-[#008747]/10"
                 type="email"
                 placeholder="you@example.com"
                 value={email}
@@ -100,7 +98,7 @@ export default function SigninPage() {
               </span>
 
               <input
-                className="h-[43px] w-full rounded-[10px] border border-[#d5e2d6] bg-white px-3 text-sm text-[#24372a] outline-none transition placeholder:text-[#9aa99d] focus:border-[#008747] focus:ring-2 focus:ring-[#008747]/10"
+                className="h-[43px] w-full rounded-[10px] border border-[#d5e2d6] bg-white px-3 text-sm !text-black outline-none transition placeholder:text-[#9aa99d] focus:border-[#008747] focus:ring-2 focus:ring-[#008747]/10"
                 type="password"
                 placeholder="কমপক্ষে ৮ অক্ষর"
                 value={password}
@@ -119,7 +117,7 @@ export default function SigninPage() {
             </button>
           </form>
 
-          {/* Divider */}
+        
           <div className="flex items-center gap-3" aria-label="অথবা">
             <div className="h-px flex-1 bg-[#dce5dc]" />
             <span className="text-xs font-medium text-[#829086]">
@@ -128,14 +126,14 @@ export default function SigninPage() {
             <div className="h-px flex-1 bg-[#dce5dc]" />
           </div>
 
-          {/* Social sign-in buttons */}
+      
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <button
               type="button"
               className="flex h-[43px] min-w-0 items-center justify-center gap-2 rounded-[10px] border border-[#d5e2d6] bg-white px-3 text-sm font-semibold text-[#304638] transition hover:bg-[#f2f7f2] disabled:opacity-60"
               onClick={() => handleSocialSignin("google")}
             >
-              {/* Google icon */}
+             
               <svg
                 aria-hidden="true"
                 viewBox="0 0 48 48"
@@ -171,7 +169,7 @@ export default function SigninPage() {
               className="flex h-[43px] min-w-0 items-center justify-center gap-2 rounded-[10px] border border-[#d5e2d6] bg-white px-3 text-sm font-semibold text-[#304638] transition hover:bg-[#f2f7f2] disabled:opacity-60"
               onClick={() => handleSocialSignin("github")}
             >
-              {/* GitHub icon */}
+            
               <svg
                 aria-hidden="true"
                 viewBox="0 0 24 24"
@@ -185,7 +183,7 @@ export default function SigninPage() {
             </button>
           </div>
 
-          {/* Sign-up link */}
+         
           <p className="text-center text-sm text-[#526459]">
             অ্যাকাউন্ট নেই?{" "}
             <Link

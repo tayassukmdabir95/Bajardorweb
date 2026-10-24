@@ -31,7 +31,7 @@ const trustedOrigins = [
   "https://bajardorweb.vercel.app",
 ];
 
-// Add your production domain from the BETTER_AUTH_URL environment variable.
+
 if (process.env.BETTER_AUTH_URL) {
   trustedOrigins.push(process.env.BETTER_AUTH_URL);
 }
