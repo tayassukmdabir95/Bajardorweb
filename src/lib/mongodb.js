@@ -7,18 +7,15 @@ if (!uri) {
   throw new Error("MONGODB_URI is missing");
 }
 
-const options = {
-  connectTimeoutMS: 10000,
-  serverSelectionTimeoutMS: 10000,
-};
-
 const globalWithMongo = globalThis;
 
 const client =
   globalWithMongo._mongoClient ??
-  new MongoClient(uri, options);
+  new MongoClient(uri, {
+    connectTimeoutMS: 10000,
+    serverSelectionTimeoutMS: 10000,
+  });
 
-// Reuse the client during development and in warm production instances.
 if (!globalWithMongo._mongoClient) {
   globalWithMongo._mongoClient = client;
 }
