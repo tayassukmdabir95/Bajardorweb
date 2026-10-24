@@ -27,7 +27,8 @@ if (
 
 const trustedOrigins = [
   "http://localhost:3000",
-   "https://bajardorweb.netlify.app"
+  "https://bajardorweb.netlify.app",
+  "https://bajardorweb.vercel.app",
 ];
 
 // Add your production domain from the BETTER_AUTH_URL environment variable.
