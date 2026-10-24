@@ -1,4 +1,3 @@
-
 import { MongoClient } from "mongodb";
 
 const uri = process.env.MONGODB_URI;
@@ -20,19 +19,21 @@ if (!globalWithMongo._mongoClient) {
   globalWithMongo._mongoClient = client;
 }
 
-const connectionPromise =
-  globalWithMongo._mongoConnectionPromise ??
-  client.connect();
-
-if (!globalWithMongo._mongoConnectionPromise) {
-  globalWithMongo._mongoConnectionPromise = connectionPromise;
-}
-
 export { client };
 
 export const db = client.db("bazardor");
 
 export async function connectToDatabase() {
-  await connectionPromise;
+  if (!globalWithMongo._mongoConnectionPromise) {
+    globalWithMongo._mongoConnectionPromise = client.connect();
+  }
+
+  try {
+    await globalWithMongo._mongoConnectionPromise;
+  } catch (error) {
+    globalWithMongo._mongoConnectionPromise = undefined;
+    throw error;
+  }
+
   return db;
 }
